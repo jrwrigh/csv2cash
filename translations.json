@@ -1,0 +1,11 @@
+{
+    "Categories":{
+        "Mortgage & Rent" : "Rent",
+        "Sporting Goods" : "Hobbies"
+    },
+    "Accounts":{
+        "BofA Core Checking" : "Checking",
+        "Regular Savings" : "Savings",
+        "Cash" : "Cash in Wallet"
+    }
+}
