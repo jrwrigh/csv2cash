@@ -54,27 +54,31 @@ csv['Date'] = csv['Date'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y'))
 # See if any duplicates exist. This is to track transfers between equity accounts (ie. internal transactions)
 csv['duplicatetf'] = csv.duplicated(subset='Amount', keep=False)
 
+# Add a checkmark column to the data. If True, then the data has been transferred to the transactions_compiled DataFrame
+csv['Transferred'] = False
+
 transactions_compiled = pd.DataFrame(
     columns=['description', 'post_date', 'note', 'split1', 'split2'])
 for index, row in csv.iterrows():
-    split1, split2, temp = {}, {}, {}
-    # Seperating the external transactions from internal. Duplicate indicates internal transaction
-    if not row['duplicatetf']:
-        temp['description'] = row['Description']
-        temp['post_date'] = row['Date']
-        temp['note'] = str(row['Notes']) + row['Original Description']
-        split1['account'] = row['account_mod']
-        split1['value'] = row['amount_mod']
-        split2['account'] = row['category_mod']
-        split2['value'] = -row['amount_mod']
+    if row['Transferred'] is False:
+        split1, split2, temp = {}, {}, {}
+        # Seperating the external transactions from internal. Duplicate indicates internal transaction
+        if not row['duplicatetf']:
+            temp['description'] = row['Description']
+            temp['post_date'] = row['Date']
+            temp['note'] = str(row['Notes']) + row['Original Description']
+            split1['account'] = row['account_mod']
+            split1['value'] = row['amount_mod']
+            split2['account'] = row['category_mod']
+            split2['value'] = -row['amount_mod']
 
-        temp['split1'] = split1
-        temp['split2'] = split2
+            temp['split1'] = split1
+            temp['split2'] = split2
 
-    # Work on Internal transactions
-    else:
-        pass
-    # set_trace()
-    if temp:
-        transactions_compiled = transactions_compiled.append(
-            temp, ignore_index=True)
+        # Work on Internal transactions
+        else:
+            pass
+        # set_trace()
+        if temp:
+            transactions_compiled = transactions_compiled.append(
+                temp, ignore_index=True)
