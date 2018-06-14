@@ -75,10 +75,10 @@ for index, row in csv.iterrows():
             temp['split1'] = split1
             temp['split2'] = split2
 
-        # Work on Internal transactions
-        else:
-            pass
-        # set_trace()
-        if temp:
             transactions_compiled = transactions_compiled.append(
                 temp, ignore_index=True)
+            csv.set_value(index, 'Transferred', True)
+        # Work on Internal transactions
+        else:
+            #TODO Added Transferred check mark for both transactions
+            pass
