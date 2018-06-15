@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 from datetime import datetime
 from IPython.core.debugger import set_trace
+import dfgui #<-- note this is only for DF visualization. Not required for CLI
 
 
 # TODO
@@ -11,13 +12,17 @@ from IPython.core.debugger import set_trace
 # # Add date distance tolerance to the internal transactions determination
 # # # # ie. do not combine two transactions unless they are within two days of each other
 
-#### INPUTS
-# path_to_CSV = Path(r'c:\Somewhere')
-path_to_CSV = Path.cwd() / 'transactions_test.csv'
+##########################################################################
+#------------INPUTS----------
+##########################################################################
+# path_to_CSV = Path.cwd() / 'transactions_test.csv'
+path_to_CSV = Path.cwd() / 'transactions.csv'
 path_to_Book = Path(r'c:\SomewhereElse')
 path_to_translationJSON = Path.cwd() / 'translations.json'
 
-#### READ IN DATA
+##########################################################################
+#--------READ IN DATA--------
+##########################################################################
 
 # Open and make translations dictionary
 with path_to_translationJSON.open() as translationjson:
@@ -25,9 +30,9 @@ with path_to_translationJSON.open() as translationjson:
 
 csv = pd.read_csv(path_to_CSV)
 
-# book = piecash.open_book(path_to_Book)
-
-#### ACTUAL PROGRAMMING
+##########################################################################
+#----CSV TRANSLATING & PREP------
+##########################################################################
 
 amount_mod = []
 account_mod = []
@@ -43,13 +48,13 @@ for index, row in csv.iterrows():
     if row['Account Name'] in translation['Accounts'].keys():
         account_mod.append(translation['Accounts'][row['Account Name']])
     else:
-        account_mod.append(None)
+        account_mod.append('None')
 
     # Make list of translated Categories
     if row['Category'] in translation['Categories'].keys():
         category_mod.append(translation['Categories'][row['Category']])
     else:
-        category_mod.append(None)
+        category_mod.append('None')
 csv['amount_mod'] = amount_mod
 csv['account_mod'] = account_mod
 csv['category_mod'] = category_mod
@@ -63,6 +68,10 @@ csv['duplicatetf'] = csv.duplicated(subset='Amount', keep=False)
 # Add a checkmark column to the data. If True, then the data has been transferred to the transactions_compiled DataFrame
 csv['is_claimed'] = False
 
+
+##########################################################################
+#--------FUNCTIONS FOR RAW DATA INTERPRETATION----------------------------
+##########################################################################
 
 def externalTransactions_append(current_transaction, raw_data,
                                 transactions_compiled):
@@ -84,8 +93,10 @@ def externalTransactions_append(current_transaction, raw_data,
     """
 
     split1, split2, temp = {}, {}, {}
+
     temp['description'] = current_transaction['Description']
     temp['post_date'] = current_transaction['Date']
+    # The GNUCash note will be the 'Notes' and 'Original Description' concatenated
     temp['note'] = str(current_transaction['Notes']
                       ) + current_transaction['Original Description']
     split1['account'] = current_transaction['account_mod']
@@ -104,8 +115,27 @@ def externalTransactions_append(current_transaction, raw_data,
 
 def internalTransaction_append(current_transaction, nearest_duplicate, raw_data,
                                transactions_compiled):
+    """
+    Combines the current_transaction and nearest_duplicate into a single internal transaction statement and appends it to transactions_compiled
+    
+    Parameters
+    ----------
+    current_transaction : DataFrame
+        The row from raw_data that holds one transaction statement to be compiled into a single other statement
+    nearest_duplicate : DataFrame
+        Same as current_transaction, but a different row.
+    raw_data : DataFrame
+        The df that holds the original data from the csv
+    transactions_compiled : DataFrame
+        The df that holds the compiled and processed transaction data
+    Returns
+    -------
+    DataFrame
+        The transactions_compiles df with the processed data from current_transaction and nearest_duplicate appended to it.
+    """
+
     split1, split2, temp = {}, {}, {}
-    # set_trace()
+
     temp[
         'description'] = current_transaction['Description'] + ' ' + nearest_duplicate['Description']
     temp['post_date'] = max(current_transaction['Date'],
@@ -114,7 +144,7 @@ def internalTransaction_append(current_transaction, nearest_duplicate, raw_data,
                       ) + current_transaction['Original Description']
     split1['account'] = current_transaction['account_mod']
     split1['value'] = current_transaction['amount_mod']
-    split2['account'] = nearest_duplicate['category_mod']
+    split2['account'] = nearest_duplicate['account_mod']
     split2['value'] = nearest_duplicate['amount_mod']
 
     temp['split1'] = split1
@@ -122,12 +152,20 @@ def internalTransaction_append(current_transaction, nearest_duplicate, raw_data,
 
     transactions_compiled = transactions_compiled.append(
         temp, ignore_index=True)
+
+    # Mark the transactions has claimed; prevents duplicate in transaction_compiled
     raw_data.at[index, 'is_claimed'] = True
     raw_data.at[nearest_duplicate['raw_dataindex'], 'is_claimed'] = True
+
+    # Change category_mod to Internal transaction. Helps distinguish transactions from one another.
+    raw_data.at[index, 'category_mod'] = 'Internal Transaction'
+    raw_data.at[nearest_duplicate['raw_dataindex'], 'category_mod'] = 'Internal Transaction'
     return(transactions_compiled)
 
 
 def determine_internalTransactions(current_transaction, raw_data):
+    """ Determines the corresponding transaction to current_transaction"""
+
     # Find all transactions that have the inverse amount and haven't been transferred
     identical_duplicates = raw_data.loc[
         (raw_data['amount_mod'] == -current_transaction['amount_mod']) &
@@ -146,7 +184,7 @@ def determine_internalTransactions(current_transaction, raw_data):
 
 
 def is_internalTransaction(current_transaction, raw_data):
-
+    """ Determines whether the current_transaction is internal"""
     if not current_transaction['duplicatetf']:
         return (False)
 
@@ -158,6 +196,9 @@ def is_internalTransaction(current_transaction, raw_data):
         if len(identical_duplicates) != 0:
             return (True)
 
+##########################################################################
+#----------RAW DATA --> gnuCASH COMPATIBLE DATA---------------------------
+##########################################################################
 
 transactions_compiled = pd.DataFrame(
     columns=['description', 'post_date', 'note', 'split1', 'split2'])
@@ -179,3 +220,9 @@ for index, current_transaction in csv.iterrows():
             transactions_compiled = internalTransaction_append(
                 current_transaction, nearest_duplicate, csv,
                 transactions_compiled)
+
+##########################################################################
+#-----------PUTTING DATA IN GNUCASH--------------------------------------
+##########################################################################
+
+book = piecash.open_book(path_to_Book)
