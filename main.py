@@ -235,9 +235,6 @@ if write_to_book:
 
     if len(book.commodities) == 1:
         currency = book.commodities[0]
-    # # filter by fullname
-    # In [23]: book.accounts(fullname="Expenses:Taxes:Social Security")
-    # Out[23]: Account<Expenses:Taxes:Social Security[EUR]>
 
     for index, transaction in transactions_compiled.iterrows():
         _ = piecash.Transaction(
@@ -246,11 +243,11 @@ if write_to_book:
             splits=[
                 piecash.Split(
                     account=book.accounts(
-                        fullname=transaction['split1']['account']),
+                        name=transaction['split1']['account']),
                     value=transaction['split1']['value']),
                 piecash.Split(
                     account=book.accounts(
-                        fullname=transaction['split2']['account']),
+                        name=transaction['split2']['account']),
                     value=transaction['split2']['value'])
             ])
 
