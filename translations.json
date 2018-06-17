@@ -1,12 +1,12 @@
 {
     "Categories":{
-        "Mortgage & Rent" : "Expenses:Rent",
-        "Sporting Goods" : "Expenses:Hobbies"
+        "Mortgage & Rent" : "Rent",
+        "Sporting Goods" : "Hobbies"
     },
     "Accounts":{
-        "BofA Core Checking" : "Assets:Current Assets:Checking",
-        "Regular Savings" : "Assets:Current Assets:Savings",
-        "Cash" : "Assets:Current Assets:Cash in Wallet",
-        "Roth Contributory IRA" : "Assets:Investments:Retirement:Market Index"
+        "BofA Core Checking" : "Checking Account",
+        "Regular Savings" : "Savings Account",
+        "Cash" : "Cash in Wallet",
+        "Roth Contributory IRA" : "Market Index"
     }
 }

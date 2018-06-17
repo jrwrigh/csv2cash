@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 from datetime import datetime
 from IPython.core.debugger import set_trace
-import dfgui #<-- note this is only for DF visualization. Not required for CLI
-
+import dfgui  #<-- note this is only for DF visualization. Not required for CLI
+from decimal import Decimal
 
 # TODO
 # # Add Log file functionality
@@ -15,9 +15,12 @@ import dfgui #<-- note this is only for DF visualization. Not required for CLI
 ##########################################################################
 #------------INPUTS----------
 ##########################################################################
-# path_to_CSV = Path.cwd() / 'transactions_test.csv'
-path_to_CSV = Path.cwd() / 'transactions.csv'
-path_to_Book = Path(r'c:\SomewhereElse')
+
+write_to_book = False
+
+path_to_CSV = Path.cwd() / 'transactions_test.csv'
+# path_to_CSV = Path.cwd() / 'transactions.csv'
+path_to_Book = Path.cwd() / 'test.gnucash'
 path_to_translationJSON = Path.cwd() / 'translations.json'
 
 ##########################################################################
@@ -40,9 +43,9 @@ category_mod = []
 for index, row in csv.iterrows():
     # Make list of transaction values with negatives
     if row['Transaction Type'] == 'debit':
-        amount_mod.append(-row['Amount'])
+        amount_mod.append(Decimal(str(-row['Amount'])))
     else:
-        amount_mod.append(row['Amount'])
+        amount_mod.append(Decimal(str(row['Amount'])))
 
     # Make list of translated Accounts
     if row['Account Name'] in translation['Accounts'].keys():
@@ -68,10 +71,10 @@ csv['duplicatetf'] = csv.duplicated(subset='Amount', keep=False)
 # Add a checkmark column to the data. If True, then the data has been transferred to the transactions_compiled DataFrame
 csv['is_claimed'] = False
 
-
 ##########################################################################
 #--------FUNCTIONS FOR RAW DATA INTERPRETATION----------------------------
 ##########################################################################
+
 
 def externalTransactions_append(current_transaction, raw_data,
                                 transactions_compiled):
@@ -159,8 +162,9 @@ def internalTransaction_append(current_transaction, nearest_duplicate, raw_data,
 
     # Change category_mod to Internal transaction. Helps distinguish transactions from one another.
     raw_data.at[index, 'category_mod'] = 'Internal Transaction'
-    raw_data.at[nearest_duplicate['raw_dataindex'], 'category_mod'] = 'Internal Transaction'
-    return(transactions_compiled)
+    raw_data.at[nearest_duplicate['raw_dataindex'],
+                'category_mod'] = 'Internal Transaction'
+    return (transactions_compiled)
 
 
 def determine_internalTransactions(current_transaction, raw_data):
@@ -175,7 +179,7 @@ def determine_internalTransactions(current_transaction, raw_data):
     nearest_duplicate = min(
         identical_duplicates.iterrows(),
         key=lambda x: abs(x[1]['Date'] - current_transaction['Date']))
-    
+
     # Add the index value of the raw_data. This is to mark it in the 'is_claimed' column of raw_data
     raw_dataindex = nearest_duplicate[0]
     nearest_duplicate = nearest_duplicate[1]
@@ -195,6 +199,7 @@ def is_internalTransaction(current_transaction, raw_data):
             (raw_data['is_claimed'] != True)]
         if len(identical_duplicates) != 0:
             return (True)
+
 
 ##########################################################################
 #----------RAW DATA --> gnuCASH COMPATIBLE DATA---------------------------
@@ -224,5 +229,124 @@ for index, current_transaction in csv.iterrows():
 ##########################################################################
 #-----------PUTTING DATA IN GNUCASH--------------------------------------
 ##########################################################################
+if write_to_book:
+    book = piecash.open_book(path_to_Book.as_posix())
 
-book = piecash.open_book(path_to_Book)
+    if len(book.commodities) == 1:
+        currency = book.commodities[0]
+    # # filter by fullname
+    # In [23]: book.accounts(fullname="Expenses:Taxes:Social Security")
+    # Out[23]: Account<Expenses:Taxes:Social Security[EUR]>
+
+    for index, transaction in transactions_compiled.iterrows():
+        _ = piecash.Transaction(
+            currency=currency,
+            description=transaction['description'],
+            splits=[
+                piecash.Split(
+                    account=book.accounts(
+                        fullname=transaction['split1']['account']),
+                    value=transaction['split1']['value']),
+                piecash.Split(
+                    account=book.accounts(
+                        fullname=transaction['split2']['account']),
+                    value=transaction['split2']['value'])
+            ])
+
+##########################################################################
+#-----------Testing functions--------------------------------------
+##########################################################################
+
+
+def transactioniter_singlerow(transactions_compiled=transactions_compiled):
+    transactioniter = transactions_compiled.iterrows()
+    transaction = transactioniter.__next__()[1]
+    return (transaction)
+
+
+def transactiontest1():
+    book = piecash.open_book(path_to_Book.as_posix())
+    currency = book.commodities[0]
+    a1 = book.accounts(name='Bond')
+    a2 = book.accounts(name='Stock')
+    _ = piecash.Transaction(
+        currency=currency,
+        description="transfer",
+        splits=[
+            piecash.Split(account=a1, value=-100),
+            piecash.Split(account=a2, value=100, quantity=30)
+        ])
+
+
+def transactiontest2():
+    book = piecash.open_book(path_to_Book.as_posix())
+    currency = book.commodities[0]
+    transaction = transactioniter_singlerow()
+    _ = piecash.Transaction(
+        currency=currency,
+        description=transaction['description'],
+        splits=[
+            piecash.Split(
+                account=book.accounts(
+                    name=transaction['split1']['account']),
+                value=transaction['split1']['value']),
+            piecash.Split(
+                account=book.accounts(
+                    name=transaction['split2']['account']),
+                value=transaction['split2']['value'])
+        ])
+
+
+def transactiontest3(x):
+    if x == 1:
+        book = piecash.open_book(path_to_Book.as_posix())
+        currency = book.commodities[0]
+        transaction = transactioniter_singlerow()
+        a1 = book.accounts(name='Bond')
+        a2 = book.accounts(name='Stock')
+        _ = piecash.Transaction(
+            currency=currency,
+            description=transaction['description'],
+            splits=[
+                piecash.Split(account=a1, value=-100),
+                piecash.Split(account=a2, value=100, quantity=30)
+            ])
+
+    if x == 2:
+        book = piecash.open_book(path_to_Book.as_posix())
+        currency = book.commodities[0]
+        transaction = transactioniter_singlerow()
+        test = {}
+        test['currency'] = book.commodities[0]
+        test['description'] = transaction['description']
+        test['splits'] = [
+                piecash.Split(
+                    account=book.accounts(
+                        name=transaction['split1']['account']),
+                    value=transaction['split1']['value']),
+                piecash.Split(
+                    account=book.accounts(
+                        name=transaction['split2']['account']),
+                    value=transaction['split2']['value'])
+            ]
+
+    if x == 3:
+        book = piecash.open_book(path_to_Book.as_posix())
+        currency = book.commodities[0]
+        transaction = transactioniter_singlerow()
+        test = {}
+        test['currency'] = book.commodities[0]
+        test['description'] = transaction['description']
+        split1, split2 = {}, {}
+        split1['account'] = book.accounts(
+                        name=transaction['split1']['account']),
+        split2['account'] = book.accounts(
+                        name=transaction['split2']['account']),
+        
+        split1['value'] = transaction['split1']['value']
+        split2['value'] = transaction['split2']['value']
+
+        split1cash = piecash.Split(**split1)
+        split2cash = piecash.Split(**split2)
+        test['splits'] = [split1cash, split2cash]
+            
