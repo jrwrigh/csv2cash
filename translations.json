@@ -1,7 +1,8 @@
 {
     "Categories":{
         "Mortgage & Rent" : "Rent",
-        "Sporting Goods" : "Hobbies"
+        "Sporting Goods" : "Hobbies",
+        "Music" : "Music/Movies"
     },
     "Accounts":{
         "BofA Core Checking" : "Checking Account",
