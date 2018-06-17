@@ -2,12 +2,14 @@
     "Categories":{
         "Mortgage & Rent" : "Rent",
         "Sporting Goods" : "Hobbies",
-        "Music" : "Music/Movies"
+        "Music" : "Music/Movies",
+        "Uncategorized" : "Uncategorized"
     },
     "Accounts":{
         "BofA Core Checking" : "Checking Account",
         "Regular Savings" : "Savings Account",
         "Cash" : "Cash in Wallet",
-        "Roth Contributory IRA" : "Market Index"
+        "Roth Contributory IRA" : "Market Index",
+        "Uncategorized" : "Uncategorized"
     }
 }

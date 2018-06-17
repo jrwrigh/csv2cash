@@ -52,13 +52,14 @@ for index, row in csv.iterrows():
     if row['Account Name'] in translation['Accounts'].keys():
         account_mod.append(translation['Accounts'][row['Account Name']])
     else:
-        account_mod.append('None')
+        account_mod.append(translation['Accounts']['Uncategorized'])
 
     # Make list of translated Categories
     if row['Category'] in translation['Categories'].keys():
         category_mod.append(translation['Categories'][row['Category']])
     else:
-        category_mod.append('None')
+        category_mod.append(translation['Categories']['Uncategorized'])
+
 csv['amount_mod'] = amount_mod
 csv['account_mod'] = account_mod
 csv['category_mod'] = category_mod
@@ -236,6 +237,11 @@ if write_to_book:
     if len(book.commodities) == 1:
         currency = book.commodities[0]
 
+    try:
+        book.account(name='Uncategorized')
+    except:
+        a1 = piecash.Account("Uncategorized", "EXPENSE", currency, parent=book.root_account)
+
     for index, transaction in transactions_compiled.iterrows():
         _ = piecash.Transaction(
             currency=currency,
@@ -347,4 +353,30 @@ def transactiontest3(x):
         split1cash = piecash.Split(**split1)
         split2cash = piecash.Split(**split2)
         test['splits'] = [split1cash, split2cash]
+
+    if x == 4:
+        book = piecash.open_book(path_to_Book.as_posix())
+        currency = book.commodities[0]
+        transaction = transactioniter_singlerow()
+
+        try:
+            book.account(name='Uncategorized')
+        except:
+            a1 = piecash.Account("Uncategorized", "EXPENSE", currency, parent=book.root_account)
+
+        for index, transaction in transactions_compiled.iterrows():
+            print(index)
+            acc1 = book.accounts(name=transaction['split1']['account'])
+            acc2 = book.accounts(name=transaction['split2']['account'])
+            _ = piecash.Transaction(
+                currency=currency,
+                description=transaction['description'],
+                splits=[
+                    piecash.Split(
+                        account=acc1,
+                        value=transaction['split1']['value']),
+                    piecash.Split(
+                        account=acc2,
+                        value=transaction['split2']['value'])
+                ])
             
