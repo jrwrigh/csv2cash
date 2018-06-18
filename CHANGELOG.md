@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.1 - 2018-06-18
+
+### Added
+- `get_uncat_transactions` to easily view what transations didn't have a translation that was applicable for them in `translations.json`.
+
 ## 0.2.0 - 2018-06-18
 
 ### Added
