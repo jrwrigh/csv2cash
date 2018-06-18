@@ -32,6 +32,13 @@ def get_compiled_transactions(path_to_rawdata,
         return (transactions_compiled, translation, rawdata, rawdata_prepped)
 
 
+# def view_uncat_transactions(path_to_rawdata, path_to_translationJSON):
+#     transactions_compiled = get_compiled_transactions(path_to_rawdata,
+#                                                       path_to_translationJSON)
+
+#     return(transactions_compiled.loc)
+
+
 ##########################################################################
 #----GETTING DATA------
 ##########################################################################
@@ -227,6 +234,7 @@ def determine_internalTransactions(current_transaction, rawdata):
     identical_duplicates = rawdata.loc[
         (rawdata['amount_mod'] == -current_transaction['amount_mod']) &
         (rawdata['is_claimed'] != True)]
+
 
     # Note that this assumes that there won't be an identical inverse transaction on the same day
     nearest_duplicate = min(
