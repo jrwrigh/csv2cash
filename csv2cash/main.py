@@ -32,6 +32,19 @@ def get_compiled_transactions(path_to_rawdata,
         return (transactions_compiled, translation, rawdata, rawdata_prepped)
 
 
+def get_uncat_transactions(path_to_rawdata, path_to_translationJSON):
+    transactions_compiled = get_compiled_transactions(path_to_rawdata,
+                                                      path_to_translationJSON)
+
+    tf = []
+    for _, row in transactions_compiled.iterrows():
+        split1tf = row['split1']['account'] == "Uncategorized"
+        split2tf = row['split2']['account'] == "Uncategorized"
+        tf.append(split1tf or split2tf)
+
+    return (transactions_compiled.loc[tf])
+
+
 ##########################################################################
 #----GETTING DATA------
 ##########################################################################
@@ -160,8 +173,8 @@ def externalTransactions_append(current_transaction, rawdata,
     split2['account'] = current_transaction['category_mod']
     split2['value'] = -current_transaction['amount_mod']
 
-    temp['split1'] = split1
-    temp['split2'] = split2
+    temp['split1'] = pd.Series(split1)
+    temp['split2'] = pd.Series(split2)
 
     transactions_compiled = transactions_compiled.append(
         temp, ignore_index=True)
@@ -203,8 +216,8 @@ def internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
     split2['account'] = nearest_duplicate['account_mod']
     split2['value'] = nearest_duplicate['amount_mod']
 
-    temp['split1'] = split1
-    temp['split2'] = split2
+    temp['split1'] = pd.Series(split1)
+    temp['split2'] = pd.Series(split2)
 
     transactions_compiled = transactions_compiled.append(
         temp, ignore_index=True)

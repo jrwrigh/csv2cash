@@ -10,11 +10,13 @@ In Mint for example, if you export a CSV of all your transfer data, it will keep
 ### Translates your CSV categories into a GNUCash account
 Say your CSV has a category system attached to each transfer and you want that organization to be transferred into Mint without having to go one-by-one through every transfer and label them. This will do that by setting up the `translation.json` dictionary, which will take a transfer that is under a given category, and place it in the corresponding GNUCash account.
 
+Use the `get_uncat_transactions` function to view any transactions that haven't been categorized. This can be useful to determine what translations you still need to add to `translationS.json`.
+
 ## How to Use:
 ### 1. Make your inputs
 There is a section in the `main.py` script called `INPUTS`. Here you will enter in the path to the CSV of your raw transfer data, the GNUCash book you want to edit, and the translation JSON.
 
-You should already have filled out the `translation.json` at this point.
+You should already have filled out the `translation.json` at this point. Use the `get_uncat_transactions` function to view any transactions that haven't been categorized. This can be useful to determine what translations you still need to add to `translationS.json`.
 
 ### 1.5 Run `get_compiled_transactions`
 I recommend doing this to make sure that all the transactions look ok. I recommend using `dfgui` as a way to view the DataFrames to make sure everything is looking right.

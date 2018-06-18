@@ -3,3 +3,4 @@ transactions_test.csv
 test
 **/test.gnucash.2*
 csv2cash/__pycache__
+personal.py
