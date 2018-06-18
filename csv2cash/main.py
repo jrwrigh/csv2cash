@@ -32,17 +32,14 @@ def get_compiled_transactions(path_to_rawdata,
         return (transactions_compiled, translation, rawdata, rawdata_prepped)
 
 
-def get_uncat_transactions(path_to_rawdata, path_to_translationJSON):
-    transactions_compiled = get_compiled_transactions(path_to_rawdata,
-                                                      path_to_translationJSON)
+def get_uncat_transfers(path_to_rawdata, path_to_translationJSON):
 
-    tf = []
-    for _, row in transactions_compiled.iterrows():
-        split1tf = row['split1']['account'] == "Uncategorized"
-        split2tf = row['split2']['account'] == "Uncategorized"
-        tf.append(split1tf or split2tf)
+    rawdata = get_rawdata(path_to_rawdata)
+    translation = get_translation(path_to_translationJSON)
 
-    return (transactions_compiled.loc[tf])
+    rawdata = translateandprep_rawdata(translation, rawdata)
+
+    return(rawdata.loc[(rawdata['category_mod'] == 'Uncategorized')])
 
 
 ##########################################################################
