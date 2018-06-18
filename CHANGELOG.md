@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.2.2 - 2018-06-18
+
+### Added
+- `get_uncat_transfers` was added. This is a fix of v0.2.1, which should have have presented a filtered DataFrame of the transfers rather than a filtered version of the transactions
+
+### Removed
+- `get_uncat_transactions` was removed
+
 ## 0.2.1 - 2018-06-18
 
 ### Added
