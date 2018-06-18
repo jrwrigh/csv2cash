@@ -238,7 +238,7 @@ if write_to_book:
         currency = book.commodities[0]
 
     try:
-        book.account(name='Uncategorized')
+        book.accounts(name='Uncategorized')
     except:
         a1 = piecash.Account("Uncategorized", "EXPENSE", currency, parent=book.root_account)
         book.save()
