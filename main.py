@@ -16,7 +16,7 @@ from decimal import Decimal
 #------------INPUTS----------
 ##########################################################################
 
-write_to_book = False
+write_to_book = True
 
 path_to_CSV = Path.cwd() / 'transactions_testPUBLIC.csv'
 # path_to_CSV = Path.cwd() / 'transactions_test.csv'
@@ -232,7 +232,7 @@ for index, current_transaction in csv.iterrows():
 #-----------PUTTING DATA IN GNUCASH--------------------------------------
 ##########################################################################
 if write_to_book:
-    book = piecash.open_book(path_to_Book.as_posix())
+    book = piecash.open_book(path_to_Book.as_posix(), readonly=False)
 
     if len(book.commodities) == 1:
         currency = book.commodities[0]
@@ -241,6 +241,7 @@ if write_to_book:
         book.account(name='Uncategorized')
     except:
         a1 = piecash.Account("Uncategorized", "EXPENSE", currency, parent=book.root_account)
+        book.save()
 
     for index, transaction in transactions_compiled.iterrows():
         _ = piecash.Transaction(
@@ -257,126 +258,5 @@ if write_to_book:
                     value=transaction['split2']['value'])
             ])
 
-##########################################################################
-#-----------Testing functions--------------------------------------
-##########################################################################
 
-
-def transactioniter_singlerow(transactions_compiled=transactions_compiled):
-    transactioniter = transactions_compiled.iterrows()
-    transaction = transactioniter.__next__()[1]
-    return (transaction)
-
-
-def transactiontest1():
-    book = piecash.open_book(path_to_Book.as_posix())
-    currency = book.commodities[0]
-    a1 = book.accounts(name='Bond')
-    a2 = book.accounts(name='Stock')
-    _ = piecash.Transaction(
-        currency=currency,
-        description="transfer",
-        splits=[
-            piecash.Split(account=a1, value=-100),
-            piecash.Split(account=a2, value=100, quantity=30)
-        ])
-
-
-def transactiontest2():
-    book = piecash.open_book(path_to_Book.as_posix())
-    currency = book.commodities[0]
-    transaction = transactioniter_singlerow()
-    _ = piecash.Transaction(
-        currency=currency,
-        description=transaction['description'],
-        splits=[
-            piecash.Split(
-                account=book.accounts(
-                    name=transaction['split1']['account']),
-                value=transaction['split1']['value']),
-            piecash.Split(
-                account=book.accounts(
-                    name=transaction['split2']['account']),
-                value=transaction['split2']['value'])
-        ])
-
-
-def transactiontest3(x):
-    if x == 1:
-        book = piecash.open_book(path_to_Book.as_posix())
-        currency = book.commodities[0]
-        transaction = transactioniter_singlerow()
-        a1 = book.accounts(name='Bond')
-        a2 = book.accounts(name='Stock')
-        _ = piecash.Transaction(
-            currency=currency,
-            description=transaction['description'],
-            splits=[
-                piecash.Split(account=a1, value=-100),
-                piecash.Split(account=a2, value=100, quantity=30)
-            ])
-
-    if x == 2:
-        book = piecash.open_book(path_to_Book.as_posix())
-        currency = book.commodities[0]
-        transaction = transactioniter_singlerow()
-        test = {}
-        test['currency'] = book.commodities[0]
-        test['description'] = transaction['description']
-        test['splits'] = [
-                piecash.Split(
-                    account=book.accounts(
-                        name=transaction['split1']['account']),
-                    value=transaction['split1']['value']),
-                piecash.Split(
-                    account=book.accounts(
-                        name=transaction['split2']['account']),
-                    value=transaction['split2']['value'])
-            ]
-
-    if x == 3:
-        book = piecash.open_book(path_to_Book.as_posix())
-        currency = book.commodities[0]
-        transaction = transactioniter_singlerow()
-        test = {}
-        test['currency'] = book.commodities[0]
-        test['description'] = transaction['description']
-        split1, split2 = {}, {}
-        split1['account'] = book.accounts(
-                        name=transaction['split1']['account']),
-        split2['account'] = book.accounts(
-                        name=transaction['split2']['account']),
-        
-        split1['value'] = transaction['split1']['value']
-        split2['value'] = transaction['split2']['value']
-
-        split1cash = piecash.Split(**split1)
-        split2cash = piecash.Split(**split2)
-        test['splits'] = [split1cash, split2cash]
-
-    if x == 4:
-        book = piecash.open_book(path_to_Book.as_posix())
-        currency = book.commodities[0]
-        transaction = transactioniter_singlerow()
-
-        try:
-            book.account(name='Uncategorized')
-        except:
-            a1 = piecash.Account("Uncategorized", "EXPENSE", currency, parent=book.root_account)
-
-        for index, transaction in transactions_compiled.iterrows():
-            print(index)
-            acc1 = book.accounts(name=transaction['split1']['account'])
-            acc2 = book.accounts(name=transaction['split2']['account'])
-            _ = piecash.Transaction(
-                currency=currency,
-                description=transaction['description'],
-                splits=[
-                    piecash.Split(
-                        account=acc1,
-                        value=transaction['split1']['value']),
-                    piecash.Split(
-                        account=acc2,
-                        value=transaction['split2']['value'])
-                ])
             
