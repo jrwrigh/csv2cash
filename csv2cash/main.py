@@ -11,21 +11,48 @@ from decimal import Decimal
 # # # # ie. do not combine two transactions unless they are within two days of each other
 
 
+def do_csv2cash(path_to_Book, path_to_rawdata, path_to_translationJSON):
+    translation = get_translation(path_to_translationJSON)
+    rawdata = get_rawdata(path_to_rawdata)
+    rawdata_prepped = translateandprep_rawdata(translation, rawdata)
+    transactions_compiled = compile_transfers(rawdata_prepped)
+    import2cash(transactions_compiled, path_to_Book)
+
+
+def get_compiled_transactions(path_to_rawdata,
+                              path_to_translationJSON,
+                              returnall=False):
+    translation = get_translation(path_to_translationJSON)
+    rawdata = get_rawdata(path_to_rawdata)
+    rawdata_prepped = translateandprep_rawdata(translation, rawdata)
+    transactions_compiled = compile_transfers(rawdata_prepped)
+
+    if not returnall: return (transactions_compiled)
+    if returnall:
+        return (transactions_compiled, translation, rawdata, rawdata_prepped)
+
+
 ##########################################################################
 #----GETTING DATA------
 ##########################################################################
 
+
 # Open and make translations dictionary
 def get_translation(path_to_translationJSON):
     with path_to_translationJSON.open() as translationjson:
-        return(jsonload(translationjson))
+        return (jsonload(translationjson))
+
 
 def get_rawdata(path_to_rawdata):
-    return(pd.read_csv(path_to_rawdata))
+    return (pd.read_csv(path_to_rawdata))
+
 
 ##########################################################################
 #----rawdata TRANSLATING & PREP------
 ##########################################################################
+def translateandprep_rawdata(translation, rawdata):
+    return (translating_rawdata(translation, preping_rawdata(rawdata)))
+
 
 def translating_rawdata(translation, rawdata):
 
@@ -56,7 +83,11 @@ def translating_rawdata(translation, rawdata):
     rawdata['category_mod'] = category_mod
 
     # Convert Date column to datetime object
-    rawdata['Date'] = rawdata['Date'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y'))
+    rawdata['Date'] = rawdata['Date'].apply(
+        lambda x: datetime.strptime(x, '%m/%d/%Y'))
+
+    return (rawdata)
+
 
 def preping_rawdata(rawdata):
     # See if any duplicates exist. This is to track transfers between equity accounts (ie. internal transactions)
@@ -65,13 +96,41 @@ def preping_rawdata(rawdata):
     # Add a checkmark column to the data. If True, then the data has been transferred to the transactions_compiled DataFrame
     rawdata['is_claimed'] = False
 
+    return (rawdata)
+
+
 ##########################################################################
-#--------FUNCTIONS FOR RAW DATA INTERPRETATION----------------------------
+#----------RAW DATA --> gnuCASH COMPATIBLE DATA---------------------------
 ##########################################################################
+
+
+def compile_transfers(rawdata):
+    transactions_compiled = pd.DataFrame(
+        columns=['description', 'post_date', 'note', 'split1', 'split2'])
+
+    for index, current_transaction in rawdata.iterrows():
+        if rawdata.at[index, 'is_claimed'] == False:
+            # Separating the external transactions from internal. Duplicate indicates internal transaction
+            internalTrans_tf = is_internalTransaction(current_transaction,
+                                                      rawdata)
+            if not internalTrans_tf:
+                transactions_compiled = externalTransactions_append(
+                    current_transaction, rawdata, transactions_compiled, index)
+
+            # Work on Internal transactions
+            elif internalTrans_tf:
+                nearest_duplicate = determine_internalTransactions(
+                    current_transaction, rawdata)
+
+                transactions_compiled = internalTransaction_append(
+                    current_transaction, nearest_duplicate, rawdata,
+                    transactions_compiled, index)
+
+    return (transactions_compiled)
 
 
 def externalTransactions_append(current_transaction, rawdata,
-                                transactions_compiled):
+                                transactions_compiled, index):
     """
     Function to append the external transaction data to the compiled DataFrame
     
@@ -111,7 +170,7 @@ def externalTransactions_append(current_transaction, rawdata,
 
 
 def internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
-                               transactions_compiled):
+                               transactions_compiled, index):
     """
     Combines the current_transaction and nearest_duplicate into a single internal transaction statement and appends it to transactions_compiled
     
@@ -157,7 +216,7 @@ def internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
     # Change category_mod to Internal transaction. Helps distinguish transactions from one another.
     rawdata.at[index, 'category_mod'] = 'Internal Transaction'
     rawdata.at[nearest_duplicate['rawdataindex'],
-                'category_mod'] = 'Internal Transaction'
+               'category_mod'] = 'Internal Transaction'
     return (transactions_compiled)
 
 
@@ -196,33 +255,6 @@ def is_internalTransaction(current_transaction, rawdata):
 
 
 ##########################################################################
-#----------RAW DATA --> gnuCASH COMPATIBLE DATA---------------------------
-##########################################################################
-
-def compile_transfers(rawdata):
-    transactions_compiled = pd.DataFrame(
-        columns=['description', 'post_date', 'note', 'split1', 'split2'])
-
-    for index, current_transaction in rawdata.iterrows():
-        if rawdata.at[index, 'is_claimed'] == False:
-            # Separating the external transactions from internal. Duplicate indicates internal transaction
-            internalTrans_tf = is_internalTransaction(current_transaction, rawdata)
-            if not internalTrans_tf:
-                transactions_compiled = externalTransactions_append(
-                    current_transaction, rawdata, transactions_compiled)
-
-            # Work on Internal transactions
-            elif internalTrans_tf:
-                nearest_duplicate = determine_internalTransactions(
-                    current_transaction, rawdata)
-
-                transactions_compiled = internalTransaction_append(
-                    current_transaction, nearest_duplicate, rawdata,
-                    transactions_compiled)
-    
-    return(transactions_compiled)
-
-##########################################################################
 #-----------PUTTING DATA IN GNUCASH--------------------------------------
 ##########################################################################
 def import2cash(transactions_compiled, path_to_Book):
@@ -234,7 +266,8 @@ def import2cash(transactions_compiled, path_to_Book):
     try:
         book.accounts(name='Uncategorized')
     except:
-        _ = piecash.Account("Uncategorized", "EXPENSE", currency, parent=book.root_account)
+        _ = piecash.Account(
+            "Uncategorized", "EXPENSE", currency, parent=book.root_account)
         book.save()
 
     for _, transaction in transactions_compiled.iterrows():
@@ -253,5 +286,3 @@ def import2cash(transactions_compiled, path_to_Book):
             ])
 
     book.save()
-
-            
