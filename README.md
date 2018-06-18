@@ -16,8 +16,12 @@ There is a section in the `main.py` script called `INPUTS`. Here you will enter 
 
 You should already have filled out the `translation.json` at this point.
 
-###2. Run the Script!
-Once you run the script, it will do all the work and edit your GNUCash book.
+### 1.5 Run `get_compiled_transactions`
+I recommend doing this to make sure that all the transactions look ok. I recommend using `dfgui` as a way to view the DataFrames to make sure everything is looking right.
+
+### 2. Run `do_csv2cash`!
+This function will do all the work and edit your GNUCash book. If you want to, you can go step-by-step by using the individual commands at each step. I recommend using `dfgui` as a way to view the DataFrames to make sure everything is looking right.
+
 
 ## Note
 Currently requires the use of a development version of `piecash` to work with GNUCash 3.X. You can install the new version currently (2018-06-18) through pip: 
