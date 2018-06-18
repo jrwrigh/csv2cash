@@ -32,11 +32,17 @@ def get_compiled_transactions(path_to_rawdata,
         return (transactions_compiled, translation, rawdata, rawdata_prepped)
 
 
-# def view_uncat_transactions(path_to_rawdata, path_to_translationJSON):
-#     transactions_compiled = get_compiled_transactions(path_to_rawdata,
-#                                                       path_to_translationJSON)
+def get_uncat_transactions(path_to_rawdata, path_to_translationJSON):
+    transactions_compiled = get_compiled_transactions(path_to_rawdata,
+                                                      path_to_translationJSON)
 
-#     return(transactions_compiled.loc)
+    tf = []
+    for _, row in transactions_compiled.iterrows():
+        split1tf = row['split1']['account'] == "Uncategorized"
+        split2tf = row['split2']['account'] == "Uncategorized"
+        tf.append(split1tf or split2tf)
+
+    return (transactions_compiled.loc[tf])
 
 
 ##########################################################################
@@ -234,7 +240,6 @@ def determine_internalTransactions(current_transaction, rawdata):
     identical_duplicates = rawdata.loc[
         (rawdata['amount_mod'] == -current_transaction['amount_mod']) &
         (rawdata['is_claimed'] != True)]
-
 
     # Note that this assumes that there won't be an identical inverse transaction on the same day
     nearest_duplicate = min(
