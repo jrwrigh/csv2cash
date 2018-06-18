@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.2.0 - 2018-06-18
+
+### Added
+- Put everything into a single package
+- Added `example.py` to show the new functionality
+- Instructions added to direct a step-by-step approach
+
+
 ## 0.1.0 - 2018-06-18
 
 ### Added
