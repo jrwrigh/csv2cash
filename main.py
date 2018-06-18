@@ -258,5 +258,6 @@ if write_to_book:
                     value=transaction['split2']['value'])
             ])
 
+    book.save()
 
             
