@@ -1,9 +1,29 @@
 {
     "Categories":{
+        "Cash & ATM" : "Uncategorized",
+        "To Be Reimbursed" : "Uncategorized",
+        "Transfer" : "Uncategorized",
         "Mortgage & Rent" : "Rent",
         "Sporting Goods" : "Hobbies",
         "Music" : "Music/Movies",
-        "Uncategorized" : "Uncategorized"
+        "Uncategorized" : "Uncategorized",
+        "Gas & Fuel" : "Gas",
+        "Fast Food" : "Dining",
+        "Restaurants" : "Dining",
+        "Income" : "Income",
+        "Education" : "Education",
+        "Gift" : "Gifts Received",
+        "Interest Income" : "Savings Interest",
+        "Electronics & Software" : "Computer",
+        "Paycheck" : "Salary",
+        "Reimbursement" : "Income",
+        "Internet" : "Online Services",
+        "Shopping" : "Expenses",
+        "Amusement" : "Recreation",
+        "Misc Expenses" : "Miscellaneous",
+        "Mobile Phone" : "Phone",
+        "Groceries" : "Groceries",
+        "Returned Purchase" : "Uncategorized"
     },
     "Accounts":{
         "BofA Core Checking" : "Checking Account",
