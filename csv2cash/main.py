@@ -121,25 +121,25 @@ def compile_transfers(rawdata):
     for index, current_transaction in rawdata.iterrows():
         if rawdata.at[index, 'is_claimed'] == False:
             # Separating the external transactions from internal. Duplicate indicates internal transaction
-            internalTrans_tf = is_internalTransaction(current_transaction,
+            internalTrans_tf = _is_internalTransaction(current_transaction,
                                                       rawdata)
             if not internalTrans_tf:
-                transactions_compiled = externalTransactions_append(
+                transactions_compiled = _externalTransactions_append(
                     current_transaction, rawdata, transactions_compiled, index)
 
             # Work on Internal transactions
             elif internalTrans_tf:
-                nearest_duplicate = determine_internalTransactions(
+                nearest_duplicate = _determine_internalTransactions(
                     current_transaction, rawdata)
 
-                transactions_compiled = internalTransaction_append(
+                transactions_compiled = _internalTransaction_append(
                     current_transaction, nearest_duplicate, rawdata,
                     transactions_compiled, index)
 
     return (transactions_compiled)
 
 
-def externalTransactions_append(current_transaction, rawdata,
+def _externalTransactions_append(current_transaction, rawdata,
                                 transactions_compiled, index):
     """
     Function to append the external transaction data to the compiled DataFrame
@@ -179,7 +179,7 @@ def externalTransactions_append(current_transaction, rawdata,
     return (transactions_compiled)
 
 
-def internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
+def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
                                transactions_compiled, index):
     """
     Combines the current_transaction and nearest_duplicate into a single internal transaction statement and appends it to transactions_compiled
@@ -230,7 +230,7 @@ def internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
     return (transactions_compiled)
 
 
-def determine_internalTransactions(current_transaction, rawdata):
+def _determine_internalTransactions(current_transaction, rawdata):
     """ Determines the corresponding transaction to current_transaction"""
 
     # Find all transactions that have the inverse amount and haven't been transferred
@@ -250,7 +250,7 @@ def determine_internalTransactions(current_transaction, rawdata):
     return (nearest_duplicate)
 
 
-def is_internalTransaction(current_transaction, rawdata):
+def _is_internalTransaction(current_transaction, rawdata):
     """ Determines whether the current_transaction is internal"""
     if not current_transaction['duplicatetf']:
         return (False)
