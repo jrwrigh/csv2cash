@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.4 - 2018-07-01
+### Added 
+- translations.json now has a "IGNORE" category options
+- README has better documentation on using translations.json
+
 ## 0.2.3 - 2018-07-01
 
 ### Added
