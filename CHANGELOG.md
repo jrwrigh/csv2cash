@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.3 - 2018-07-01
+
+### Added
+- `write_account_list` was added. This will write the fullname of accounts listed in GNUCash book
+
 ## 0.2.2 - 2018-06-18
 
 ### Added

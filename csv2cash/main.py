@@ -41,6 +41,17 @@ def get_uncat_transfers(path_to_rawdata, path_to_translationJSON):
 
     return(rawdata.loc[(rawdata['category_mod'] == 'Uncategorized')])
 
+def write_account_list(path_to_Book, path_to_accountlistfile):
+    """ Write list of accounts in book to a text file"""
+    book = piecash.open_book(path_to_Book.as_posix())
+
+    accountstr = ""
+    for account in book.accounts:
+        accountstr += account.fullname
+        accountstr += '\n'
+
+    path_to_accountlistfile.write_text(accountstr)
+
 
 ##########################################################################
 #----GETTING DATA------

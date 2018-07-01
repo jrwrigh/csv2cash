@@ -4,3 +4,5 @@ test
 **/test.gnucash.2*
 csv2cash/__pycache__
 personal.py
+accountlist.txt
+*rope*
