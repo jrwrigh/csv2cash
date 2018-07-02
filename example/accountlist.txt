@@ -1,0 +1,80 @@
+Assets
+Assets:Investments
+Assets:Investments:Retirement
+Assets:Investments:Retirement:Bond
+Assets:Investments:Retirement:Stock
+Assets:Investments:Retirement:Market Index
+Assets:Investments:Retirement:Mutual Fund
+Assets:Investments:Brokerage Account
+Assets:Investments:Brokerage Account:Bond
+Assets:Investments:Brokerage Account:Stock
+Assets:Investments:Brokerage Account:Market Index
+Assets:Investments:Brokerage Account:Mutual Fund
+Assets:Current Assets
+Assets:Current Assets:Checking Account
+Assets:Current Assets:Savings Account
+Assets:Current Assets:Cash in Wallet
+Expenses
+Expenses:Insurance
+Expenses:Insurance:Rental Insurance
+Expenses:Insurance:Auto Insurance
+Expenses:Insurance:Health Insurance
+Expenses:Insurance:Life Insurance
+Expenses:Rent
+Expenses:Commissions
+Expenses:Adjustment
+Expenses:Auto
+Expenses:Auto:Fees
+Expenses:Auto:Gas
+Expenses:Auto:Parking
+Expenses:Auto:Repair and Maintenance
+Expenses:Bank Service Charge
+Expenses:Books
+Expenses:Cable
+Expenses:Charity
+Expenses:Clothes
+Expenses:Computer
+Expenses:Dining
+Expenses:Education
+Expenses:Entertainment
+Expenses:Entertainment:Music/Movies
+Expenses:Entertainment:Recreation
+Expenses:Entertainment:Travel
+Expenses:Gifts
+Expenses:Groceries
+Expenses:Hobbies
+Expenses:Laundry/Dry Cleaning
+Expenses:Medical Expenses
+Expenses:Miscellaneous
+Expenses:Online Services
+Expenses:Phone
+Expenses:Public Transportation
+Expenses:Subscriptions
+Expenses:Supplies
+Expenses:Taxes
+Expenses:Taxes:Federal
+Expenses:Taxes:Medicare
+Expenses:Taxes:Other Tax
+Expenses:Taxes:Social Security
+Expenses:Taxes:State/Province
+Expenses:Utilities
+Expenses:Utilities:Electric
+Expenses:Utilities:Garbage collection
+Expenses:Utilities:Gas
+Expenses:Utilities:Water
+Income
+Income:Dividend Income
+Income:Interest Income
+Income:Interest Income:Bond Interest
+Income:Interest Income:Checking Interest
+Income:Interest Income:Other Interest
+Income:Interest Income:Savings Interest
+Income:Bonus
+Income:Gifts Received
+Income:Other Income
+Income:Salary
+Liabilities
+Liabilities:Credit Card
+Equity
+Equity:Opening Balances
+Uncategorized
