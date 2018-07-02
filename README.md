@@ -1,11 +1,11 @@
 # csv2cash
-Repo for importing CSV files to GNUCash with some preprocessing built in.
+Python package for importing CSV files to GNUCash with some preprocessing built in.
 
 ## What does it do?
 ### It takes your raw transfer data and compiles it into transactions
-A transfer is simply half of a transaction in double-entry bookkeeping (which GNUCash uses). So if you move money from Bank Account A to Bank Account B, then you have two transfer records; one from Bank Account A saying XXX money was withdrawn and one from Bank Account B saying XXX money was deposited. 
+A transfer is simply half of a transaction in [double-entry bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping_system) ([which GNUCash uses](https://www.gnucash.org/features.phtml#main-feat)). So if you move money from Bank Account A to Bank Account B, then you have two transfer records, one for each Account. One from Bank Account A saying $XXX money was withdrawn and one from Bank Account B saying $XXX money was deposited. In GNUCash, though, these two transfers are viewed as a single transaction: $XXX was moved from Bank Account A --> Bank Account B.
 
-In Mint for example, if you export a CSV of all your transfer data, it will keep each transfer separate from the other, even though they are directly related and should be viewed as a single transaction. This script finds the separate transfers, figures out which ones correspond to each other, and puts their data together
+In Mint for example, if you export a CSV of all your transfer data, it will keep each transfer separate from the other, even though they are directly related and should be viewed as a single transaction. This package finds the separate transfers, figures out which ones correspond to each other, and puts their data together
 
 ### Translates your CSV categories into a GNUCash account
 Say your CSV has a category system attached to each transfer and you want that organization to be transferred into Mint without having to go one-by-one through every transfer and label them. This will do that by setting up the `translation.json` dictionary, which will take a transfer that is under a given category, and place it in the corresponding GNUCash account.
@@ -14,7 +14,7 @@ Use the `get_uncat_transfers` function to view any transactions that haven't bee
 
 ## Requirements
 - pandas
-- piecash (see note below about versioning)
+- piecash (see [note](#note) below about versioning)
 - Verified for Python 3.6, though should work for other versions
 
 # Instructions:
