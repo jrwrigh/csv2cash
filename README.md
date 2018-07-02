@@ -19,7 +19,7 @@ Use the `get_uncat_transfers` function to view any transactions that haven't bee
 
 # Instructions:
 
-See examples in `./example` (to be done soon) for how to use the module effectively. 
+See examples in `./example` for how to use the module effectively. 
 
 ## Structure:
 The module takes data from a .csv file, translates information (such as category and account names) by referencing the `translations.json` dictionary, combines internal transfers (ie. moving money from savings account to checking account), and puts the translated data into the GNUCash Book of your choosing.
