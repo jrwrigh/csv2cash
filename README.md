@@ -1,9 +1,10 @@
-# csv2cash
+<h1 align="center">csv2cash</h1>
 <p align="center"><strong>Python package for importing CSV files to GNUCash with some preprocessing built in.</strong></p>
-
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/u2berggeist/csv2cash/graphs/commit-activity)
 [![Say Thanks!](https://img.shields.io/badge/Say-Thanks&#33;-orange.svg?longCache=true&style=flat-square)](https://saythanks.io/to/u2berggeist)
+#### Like the package? [Let me know!](https://saythanks.io/to/u2berggeist)
+#### Having issues or an idea for improvement? [Make an issue!](https://github.com/u2berggeist/csv2cash/issues)
 
 ## What does it do?
 ### It takes your raw transfer data and compiles it into transactions
@@ -80,3 +81,5 @@ A few tools have been created in order to assist with the creation of the `trans
 Currently requires the use of a development version of `piecash` to work with GNUCash 3.X. You can install the new version currently (2018-06-18) through pip: 
 
 `pip install git+https://github.com/sdementen/piecash.git@feature/py3-gnucash3`
+
+
