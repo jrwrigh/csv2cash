@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- Removed common placeholder accounts from translation.json
+
 ## 0.3.1 - 2018-8-9
 
 ### Fixed
