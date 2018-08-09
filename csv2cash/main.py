@@ -4,13 +4,23 @@ from pathlib import Path
 import pandas as pd
 from datetime import datetime
 from decimal import Decimal
+import logging
 
 # TODO
 # # Add Log file functionality
 
+logging.basicConfig(
+    format=
+    '%(asctime)s, %(levelname)-8s [%(filename)s:%(module)s:%(funcName)s:%(lineno)d] %(message)s',
+    datefmt='%d-%m-%Y:%H:%M:%S',
+    level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 
 def do_csv2cash(path_to_Book, path_to_rawdata, path_to_translationJSON):
     """Performs all csv -> GNUCash operations"""
+
+    logger.debug(f'Function start arguments: {locals()}')
 
     translation = get_translation(path_to_translationJSON)
     rawdata = get_rawdata(path_to_rawdata)
@@ -23,6 +33,8 @@ def get_compiled_transactions(path_to_rawdata,
                               path_to_translationJSON,
                               returnall=False):
     """Returns DataFrame of compiled transactions"""
+
+    logger.debug(f'Function start arguments: {locals()}')
 
     translation = get_translation(path_to_translationJSON)
     rawdata = get_rawdata(path_to_rawdata)
@@ -38,6 +50,8 @@ def get_compiled_transactions(path_to_rawdata,
 def get_uncat_transfers(path_to_rawdata, path_to_translationJSON):
     """Returns DataFrame of uncategorized transfers"""
 
+    logger.debug(f'Function start arguments: {locals()}')
+
     rawdata = get_rawdata(path_to_rawdata)
     translation = get_translation(path_to_translationJSON)
 
@@ -48,6 +62,9 @@ def get_uncat_transfers(path_to_rawdata, path_to_translationJSON):
 
 def write_account_list(path_to_Book, path_to_accountlistfile):
     """ Write list of accounts in book to a text file"""
+
+    logger.debug(f'Function start arguments: {locals()}')
+
     book = piecash.open_book(path_to_Book.as_posix())
 
     accountstr = ""
@@ -66,12 +83,16 @@ def write_account_list(path_to_Book, path_to_accountlistfile):
 # Open and make translations dictionary
 def get_translation(path_to_translationJSON):
     """Returns dictionary with translations.json data"""
+
+    logger.debug(f'Function start arguments: {locals()}')
     with path_to_translationJSON.open() as translationjson:
         return (jsonload(translationjson))
 
 
 def get_rawdata(path_to_rawdata):
     """Returns pandas DF of rawdata csv"""
+
+    logger.debug(f'Function start arguments: {locals()}')
     return (pd.read_csv(path_to_rawdata))
 
 
@@ -80,6 +101,8 @@ def get_rawdata(path_to_rawdata):
 ##########################################################################
 def translateandprep_rawdata(translation, rawdata):
     """Single function to combine translating_rawdata and preping_rawdata"""
+
+    logger.debug(f'Function start arguments: {locals()}')
     return (translating_rawdata(translation, preping_rawdata(rawdata)))
 
 
@@ -100,6 +123,8 @@ def translating_rawdata(translation, rawdata):
     DataFrame
         csv data with it's contents translated and filtered out.
     """
+
+    logger.debug(f'Function start arguments: {locals()}')
 
     amount_mod = []
     account_mod = []
@@ -141,6 +166,8 @@ def translating_rawdata(translation, rawdata):
 def preping_rawdata(rawdata):
     """Finds duplicate transactions and adds 'is_claimed' column"""
 
+    logger.debug(f'Function start arguments: {locals()}')
+
     # See if any duplicates exist. This is to track transfers between equity accounts (ie. internal transactions)
     rawdata['duplicatetf'] = rawdata.duplicated(subset='Amount', keep=False)
 
@@ -157,6 +184,8 @@ def preping_rawdata(rawdata):
 
 def compile_transfers(rawdata):
     """Returns DataFrame of processed transaction data"""
+
+    logger.debug(f'Function start arguments: {locals()}')
 
     transactions_compiled = pd.DataFrame(
         columns=['description', 'post_date', 'note', 'split1', 'split2'])
@@ -200,6 +229,8 @@ def _externalTransactions_append(current_transaction, rawdata,
     DataFrame
         The transactions_compiled df with the data from current_transaction appended to it
     """
+
+    logger.debug(f'Function start arguments: {locals()}')
 
     split1, split2, temp = {}, {}, {}
 
@@ -245,6 +276,8 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
         The transactions_compiles df with the processed data from current_transaction and nearest_duplicate appended to it.
     """
 
+    logger.debug(f'Function start arguments: {locals()}')
+
     split1, split2, temp = {}, {}, {}
 
     # Add transaction information to temporary transaction series
@@ -283,6 +316,8 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
 def _determine_internalTransactions(current_transaction, rawdata):
     """Determines the corresponding transaction to current_transaction"""
 
+    logger.debug(f'Function start arguments: {locals()}')
+
     # Find all transactions that have the inverse amount and haven't been transferred
     identical_duplicates = rawdata.loc[
         (rawdata['amount_mod'] == -current_transaction['amount_mod']) &
@@ -304,6 +339,8 @@ def _determine_internalTransactions(current_transaction, rawdata):
 def _is_internalTransaction(current_transaction, rawdata):
     """Determines whether the current_transaction is internal"""
 
+    logger.debug(f'Function start arguments: {locals()}')
+
     if not current_transaction['duplicatetf']:
         return (False)
 
@@ -321,6 +358,8 @@ def _is_internalTransaction(current_transaction, rawdata):
 ##########################################################################
 def import2cash(transactions_compiled, path_to_Book):
     """Write compiled transactions to GNUCash Book"""
+
+    logger.debug(f'Function start arguments: {locals()}')
 
     book = piecash.open_book(path_to_Book.as_posix(), readonly=False)
 
