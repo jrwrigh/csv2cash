@@ -39,7 +39,8 @@ def get_uncat_transfers(path_to_rawdata, path_to_translationJSON):
 
     rawdata = translateandprep_rawdata(translation, rawdata)
 
-    return(rawdata.loc[(rawdata['category_mod'] == 'Uncategorized')])
+    return (rawdata.loc[(rawdata['category_mod'] == 'Uncategorized')])
+
 
 def write_account_list(path_to_Book, path_to_accountlistfile):
     """ Write list of accounts in book to a text file"""
@@ -133,7 +134,7 @@ def compile_transfers(rawdata):
         if rawdata.at[index, 'is_claimed'] == False:
             # Separating the external transactions from internal. Duplicate indicates internal transaction
             internalTrans_tf = _is_internalTransaction(current_transaction,
-                                                      rawdata)
+                                                       rawdata)
             if not internalTrans_tf:
                 transactions_compiled = _externalTransactions_append(
                     current_transaction, rawdata, transactions_compiled, index)
@@ -151,7 +152,7 @@ def compile_transfers(rawdata):
 
 
 def _externalTransactions_append(current_transaction, rawdata,
-                                transactions_compiled, index):
+                                 transactions_compiled, index):
     """
     Function to append the external transaction data to the compiled DataFrame
     
@@ -191,7 +192,7 @@ def _externalTransactions_append(current_transaction, rawdata,
 
 
 def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
-                               transactions_compiled, index):
+                                transactions_compiled, index):
     """
     Combines the current_transaction and nearest_duplicate into a single internal transaction statement and appends it to transactions_compiled
     
@@ -279,11 +280,17 @@ def _is_internalTransaction(current_transaction, rawdata):
 #-----------PUTTING DATA IN GNUCASH--------------------------------------
 ##########################################################################
 def import2cash(transactions_compiled, path_to_Book):
+    """Import compiled transactions into the GNUCash Book"""
+
     book = piecash.open_book(path_to_Book.as_posix(), readonly=False)
 
+    # if the GNUCash Book has one currency, use that currency
     if len(book.commodities) == 1:
         currency = book.commodities[0]
+    else:
+        raise RuntimeError('GNUCash Book must have 1 commodity. Please make GitHub issue if this is an issue for you.')
 
+    # create "Uncategorized" account if none exists
     try:
         book.accounts(name='Uncategorized')
     except:
