@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.2.5 - 2018-08-09
+
+### Added
+- Docstrings for every function
+- Added `dfgui` section to `example/example.py`
+
+### Fixed
+- "IGNORE" functionality is now working
+- Corrected `example/translation.json` entry for Clothing
+
 ## 0.2.4 - 2018-07-02
 
 ### Added 
