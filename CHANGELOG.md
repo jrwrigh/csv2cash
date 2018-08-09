@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.3.0 - 2018-08-09
+
+### Added
+- Logging is now a functionality!
+
 ## 0.2.5 - 2018-08-09
 
 ### Added
