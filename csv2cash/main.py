@@ -381,6 +381,9 @@ def _is_internalTransaction(current_transaction, rawdata, index):
             logger.debug(
                 f'RAWINDEX={index}, Transfer has duplicate but no matching transfer, therefore external'
             )
+            logger.warning(
+                f'RAWINDEX={index}, Transfer has duplicate but no matching transfer. Previous matches could\'ve been already claimed. Will assume the transaction is external. Be sure to check the transaction to be sure that it is parsed correctly.'
+            )
             return (False)
 
 
