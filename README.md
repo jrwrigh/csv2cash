@@ -21,6 +21,8 @@ Use the `get_uncat_transfers` function to view any transactions that haven't bee
 - pandas
 - piecash (see [note](#note) below about versioning)
 - Verified for Python 3.6, though should work for other versions
+#### Recommended:
+- [dfgui](https://github.com/bluenote10/PandasDataFrameGUI) for pandas DataFrame visualization
 
 # Instructions:
 
