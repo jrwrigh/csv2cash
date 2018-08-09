@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="csv2cash",
-    version="0.2.4",
+    version="0.2.5",
     author="u2berggeist",
     description="Module to process CSV and import into GNUCash",
     long_description=long_description,
