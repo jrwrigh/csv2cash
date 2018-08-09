@@ -7,11 +7,11 @@ from decimal import Decimal
 
 # TODO
 # # Add Log file functionality
-# # Add date distance tolerance to the internal transactions determination
-# # # # ie. do not combine two transactions unless they are within two days of each other
 
 
 def do_csv2cash(path_to_Book, path_to_rawdata, path_to_translationJSON):
+    """Performs all csv -> GNUCash operations"""
+
     translation = get_translation(path_to_translationJSON)
     rawdata = get_rawdata(path_to_rawdata)
     rawdata_prepped = translateandprep_rawdata(translation, rawdata)
@@ -22,17 +22,21 @@ def do_csv2cash(path_to_Book, path_to_rawdata, path_to_translationJSON):
 def get_compiled_transactions(path_to_rawdata,
                               path_to_translationJSON,
                               returnall=False):
+    """Returns DataFrame of compiled transactions"""
+
     translation = get_translation(path_to_translationJSON)
     rawdata = get_rawdata(path_to_rawdata)
     rawdata_prepped = translateandprep_rawdata(translation, rawdata)
     transactions_compiled = compile_transfers(rawdata_prepped)
 
-    if not returnall: return (transactions_compiled)
-    if returnall:
+    if not returnall:
+        return (transactions_compiled)
+    else:
         return (transactions_compiled, translation, rawdata, rawdata_prepped)
 
 
 def get_uncat_transfers(path_to_rawdata, path_to_translationJSON):
+    """Returns DataFrame of uncategorized transfers"""
 
     rawdata = get_rawdata(path_to_rawdata)
     translation = get_translation(path_to_translationJSON)
@@ -61,11 +65,13 @@ def write_account_list(path_to_Book, path_to_accountlistfile):
 
 # Open and make translations dictionary
 def get_translation(path_to_translationJSON):
+    """Returns dictionary with translations.json data"""
     with path_to_translationJSON.open() as translationjson:
         return (jsonload(translationjson))
 
 
 def get_rawdata(path_to_rawdata):
+    """Returns pandas DF of rawdata csv"""
     return (pd.read_csv(path_to_rawdata))
 
 
@@ -73,10 +79,27 @@ def get_rawdata(path_to_rawdata):
 #----rawdata TRANSLATING & PREP------
 ##########################################################################
 def translateandprep_rawdata(translation, rawdata):
+    """Single function to combine translating_rawdata and preping_rawdata"""
     return (translating_rawdata(translation, preping_rawdata(rawdata)))
 
 
 def translating_rawdata(translation, rawdata):
+    """Translates the rawdata using translation.json dictionary
+
+    Translates the amount, account, and label of the rawdata based on the dictionary provided by 'translations.json' file. Also filters out transfers that match an 'IGNORE' translation.
+    
+    Parameters
+    ----------
+    translation : dict of dicts
+        Holds the tranlastions from rawdata values to GNUCash values. Created using 'translations.json' file.
+    rawdata : DataFrame
+        The csv data after going through preping_rawdata().
+    
+    Returns
+    -------
+    DataFrame
+        csv data with it's contents translated and filtered out.
+    """
 
     amount_mod = []
     account_mod = []
@@ -116,6 +139,8 @@ def translating_rawdata(translation, rawdata):
 
 
 def preping_rawdata(rawdata):
+    """Finds duplicate transactions and adds 'is_claimed' column"""
+
     # See if any duplicates exist. This is to track transfers between equity accounts (ie. internal transactions)
     rawdata['duplicatetf'] = rawdata.duplicated(subset='Amount', keep=False)
 
@@ -131,6 +156,8 @@ def preping_rawdata(rawdata):
 
 
 def compile_transfers(rawdata):
+    """Returns DataFrame of processed transaction data"""
+
     transactions_compiled = pd.DataFrame(
         columns=['description', 'post_date', 'note', 'split1', 'split2'])
 
@@ -157,8 +184,7 @@ def compile_transfers(rawdata):
 
 def _externalTransactions_append(current_transaction, rawdata,
                                  transactions_compiled, index):
-    """
-    Function to append the external transaction data to the compiled DataFrame
+    """Append the external transaction data to the compiled DataFrame
     
     Parameters
     ----------
@@ -168,6 +194,7 @@ def _externalTransactions_append(current_transaction, rawdata,
         The df that holds the initial data collected (rawdata)
     transactions_compiled : DataFrame
         The df that holds the compiled transaction data
+
     Returns
     -------
     DataFrame
@@ -197,7 +224,8 @@ def _externalTransactions_append(current_transaction, rawdata,
 
 def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
                                 transactions_compiled, index):
-    """
+    """Appends internal transaction to transactions_compiled
+
     Combines the current_transaction and nearest_duplicate into a single internal transaction statement and appends it to transactions_compiled
     
     Parameters
@@ -210,6 +238,7 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
         The df that holds the original data from the rawdata
     transactions_compiled : DataFrame
         The df that holds the compiled and processed transaction data
+
     Returns
     -------
     DataFrame
@@ -218,17 +247,21 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
 
     split1, split2, temp = {}, {}, {}
 
+    # Add transaction information to temporary transaction series
     temp[
         'description'] = current_transaction['Description'] + ' ' + nearest_duplicate['Description']
     temp['post_date'] = max(current_transaction['Date'],
                             nearest_duplicate['Date'])
     temp['note'] = str(current_transaction['Notes']
                       ) + current_transaction['Original Description']
+
+    # Organizes transfer info between split1 and split1
     split1['account'] = current_transaction['account_mod']
     split1['value'] = current_transaction['amount_mod']
     split2['account'] = nearest_duplicate['account_mod']
     split2['value'] = nearest_duplicate['amount_mod']
 
+    # Add split1 and split2 info to temporary transaction Series
     temp['split1'] = pd.Series(split1)
     temp['split2'] = pd.Series(split2)
 
@@ -243,11 +276,12 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
     rawdata.at[index, 'category_mod'] = 'Internal Transaction'
     rawdata.at[nearest_duplicate['rawdataindex'],
                'category_mod'] = 'Internal Transaction'
+
     return (transactions_compiled)
 
 
 def _determine_internalTransactions(current_transaction, rawdata):
-    """ Determines the corresponding transaction to current_transaction"""
+    """Determines the corresponding transaction to current_transaction"""
 
     # Find all transactions that have the inverse amount and haven't been transferred
     identical_duplicates = rawdata.loc[
@@ -263,11 +297,13 @@ def _determine_internalTransactions(current_transaction, rawdata):
     rawdataindex = nearest_duplicate[0]
     nearest_duplicate = nearest_duplicate[1]
     nearest_duplicate['rawdataindex'] = rawdataindex
+
     return (nearest_duplicate)
 
 
 def _is_internalTransaction(current_transaction, rawdata):
-    """ Determines whether the current_transaction is internal"""
+    """Determines whether the current_transaction is internal"""
+
     if not current_transaction['duplicatetf']:
         return (False)
 
@@ -284,7 +320,7 @@ def _is_internalTransaction(current_transaction, rawdata):
 #-----------PUTTING DATA IN GNUCASH--------------------------------------
 ##########################################################################
 def import2cash(transactions_compiled, path_to_Book):
-    """Import compiled transactions into the GNUCash Book"""
+    """Write compiled transactions to GNUCash Book"""
 
     book = piecash.open_book(path_to_Book.as_posix(), readonly=False)
 
@@ -292,7 +328,9 @@ def import2cash(transactions_compiled, path_to_Book):
     if len(book.commodities) == 1:
         currency = book.commodities[0]
     else:
-        raise RuntimeError('GNUCash Book must have 1 commodity. Please make GitHub issue if this is an issue for you.')
+        raise RuntimeError(
+            'GNUCash Book must have 1 commodity. Please make GitHub issue if this is an issue for you.'
+        )
 
     # create "Uncategorized" account if none exists
     try:
