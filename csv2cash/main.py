@@ -104,6 +104,10 @@ def translating_rawdata(translation, rawdata):
     rawdata['account_mod'] = account_mod
     rawdata['category_mod'] = category_mod
 
+    # If something is translated to 'IGNORE', then it will be dropped from rawdata
+    rawdata = rawdata[(rawdata['category_mod'] !=
+                       'IGNORE')][(rawdata['account_mod'] != 'IGNORE')]
+
     # Convert Date column to datetime object
     rawdata['Date'] = rawdata['Date'].apply(
         lambda x: datetime.strptime(x, '%m/%d/%Y'))
