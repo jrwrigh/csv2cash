@@ -24,6 +24,8 @@ def do_csv2cash(path_to_Book, path_to_rawdata, path_to_translationJSON):
 
     translation = get_translation(path_to_translationJSON)
     rawdata = get_rawdata(path_to_rawdata)
+    logger.info(f'Number of rows in rawdata: {len(rawdata.index)}')
+
     rawdata_prepped = translateandprep_rawdata(translation, rawdata)
     transactions_compiled = compile_transfers(rawdata_prepped)
     import2cash(transactions_compiled, path_to_Book)
@@ -130,7 +132,7 @@ def translating_rawdata(translation, rawdata):
     account_mod = []
     category_mod = []
     for index, row in rawdata.iterrows():
-        logger.debug(f'RAWINDEX={index}, current contents= {row.to_dict()}.')
+        logger.debug(f'RAWINDEX={index}, translation started')
 
         # Make list of transaction values with negatives
         if row['Transaction Type'] == 'debit':
@@ -192,19 +194,12 @@ def compile_transfers(rawdata):
     """Returns DataFrame of processed transaction data"""
 
     logger.info(f'Function start')
-    logger.debug(
-        'Every transfer will be logged using a "RAWINDEX=[index]," format. Example below'
-    )
-    logger.debug(
-        'RAWINDEX=-5, {Information regarding what function is performed to the transfer at index -5'
-    )
 
     transactions_compiled = pd.DataFrame(
         columns=['description', 'post_date', 'note', 'split1', 'split2'])
 
     for index, current_transaction in rawdata.iterrows():
-        logger.debug(
-            f'RAWINDEX={index}, Working on: {current_transaction.to_dict()}')
+        logger.debug(f'RAWINDEX={index}, Compilation process start')
         if rawdata.at[index, 'is_claimed'] == False:
             # Separating the external transactions from internal. Duplicate indicates internal transaction
             internalTrans_tf = _is_internalTransaction(current_transaction,
@@ -244,7 +239,7 @@ def _externalTransactions_append(current_transaction, rawdata,
         The transactions_compiled df with the data from current_transaction appended to it
     """
 
-    logger.debug(f'RAWINDEX={index}, Function start arguments: {locals()}')
+    logger.debug(f'RAWINDEX={index}, External Transaction being appended')
 
     split1, split2, temp = {}, {}, {}
 
@@ -263,7 +258,7 @@ def _externalTransactions_append(current_transaction, rawdata,
 
     transactions_compiled = transactions_compiled.append(
         temp, ignore_index=True)
-    logger.debug(f'RAWINDEX={index}, Transaction added: {temp}')
+    logger.debug(f'RAWINDEX={index}, Transaction added successfully')
 
     rawdata.at[index, 'is_claimed'] = True
     return (transactions_compiled)
@@ -292,7 +287,7 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
         The transactions_compiles df with the processed data from current_transaction and nearest_duplicate appended to it.
     """
 
-    logger.debug(f'RAWINDEX={index}, Function start arguments: {locals()}')
+    logger.debug(f'RAWINDEX={index}, Internal Transaction being appended')
 
     split1, split2, temp = {}, {}, {}
 
@@ -316,7 +311,7 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
 
     transactions_compiled = transactions_compiled.append(
         temp, ignore_index=True)
-    logger.debug(f'RAWINDEX={index}, Transaction added: {temp}')
+    logger.debug(f'RAWINDEX={index}, Transaction added successfully')
 
     # Mark the transactions has claimed; prevents duplicate in transaction_compiled
     rawdata.at[index, 'is_claimed'] = True
@@ -333,7 +328,7 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
 def _determine_internalTransactions(current_transaction, rawdata, index):
     """Determines the corresponding transaction to current_transaction"""
 
-    logger.debug(f'RAWINDEX={index}, Function start arguments: {locals()}')
+    logger.debug(f'RAWINDEX={index}, determining corresponding transaction')
 
     # Find all transactions that have the inverse amount and haven't been transferred
     identical_duplicates = rawdata.loc[
@@ -350,9 +345,8 @@ def _determine_internalTransactions(current_transaction, rawdata, index):
     nearest_duplicate = nearest_duplicate[1]
     nearest_duplicate['rawdataindex'] = rawdataindex
     logger.debug(
-        f'RAWINDEX={index}, Duplicate determined to be at RAWINDEX={rawdataindex}.')
-    logger.debug(
-        f'RAWINDEX={index}, Duplicate contents: {nearest_duplicate.to_dict()}')
+        f'RAWINDEX={index}, Duplicate determined to be at RAWINDEX={rawdataindex}.'
+    )
 
     return (nearest_duplicate)
 
@@ -360,7 +354,7 @@ def _determine_internalTransactions(current_transaction, rawdata, index):
 def _is_internalTransaction(current_transaction, rawdata, index):
     """Determines whether the current_transaction is internal"""
 
-    logger.debug(f'RAWINDEX={index}, Function start arguments: {locals()}')
+    logger.debug(f'RAWINDEX={index}, determining transaction type')
 
     if not current_transaction['duplicatetf']:
         logger.debug(
@@ -381,6 +375,9 @@ def _is_internalTransaction(current_transaction, rawdata, index):
             logger.debug(
                 f'RAWINDEX={index}, Transfer has duplicate but no matching transfer, therefore external'
             )
+            logger.warning(
+                f'RAWINDEX={index}, Transfer has duplicate but no matching transfer. Previous matches could\'ve been already claimed. Will assume the transaction is external. Be sure to check the transaction to be sure that it is parsed correctly.'
+            )
             return (False)
 
 
@@ -391,6 +388,7 @@ def import2cash(transactions_compiled, path_to_Book):
     """Write compiled transactions to GNUCash Book"""
 
     logger.info(f'Function start')
+    logger.info(f'Length of transactions_compiled: {len(transactions_compiled.index)}')
 
     book = piecash.open_book(path_to_Book.as_posix(), readonly=False)
 
@@ -411,9 +409,8 @@ def import2cash(transactions_compiled, path_to_Book):
         book.save()
 
     for index, transaction in transactions_compiled.iterrows():
-        logger.debug(f'COMPILEDINDEX={index}, writing transaction to GNUCashBook')
         logger.debug(
-            f'COMPILEDINDEX={index}, transaction contents= {transaction.to_dict()}')
+            f'COMPILEDINDEX={index}, writing transaction to GNUCashBook')
         _ = piecash.Transaction(
             currency=currency,
             description=transaction['description'],
