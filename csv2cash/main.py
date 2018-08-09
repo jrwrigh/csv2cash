@@ -102,7 +102,7 @@ def get_rawdata(path_to_rawdata):
 def translateandprep_rawdata(translation, rawdata):
     """Single function to combine translating_rawdata and preping_rawdata"""
 
-    logger.info(f'Function start arguments: {locals()}')
+    logger.info(f'Function start')
     return (translating_rawdata(translation, preping_rawdata(rawdata)))
 
 
@@ -124,7 +124,7 @@ def translating_rawdata(translation, rawdata):
         csv data with it's contents translated and filtered out.
     """
 
-    logger.info(f'Function start arguments: {locals()}')
+    logger.info(f'Function start')
 
     amount_mod = []
     account_mod = []
@@ -172,7 +172,7 @@ def translating_rawdata(translation, rawdata):
 def preping_rawdata(rawdata):
     """Finds duplicate transactions and adds 'is_claimed' column"""
 
-    logger.info(f'Function start arguments: {locals()}')
+    logger.info(f'Function start')
 
     # See if any duplicates exist. This is to track transfers between equity accounts (ie. internal transactions)
     rawdata['duplicatetf'] = rawdata.duplicated(subset='Amount', keep=False)
@@ -191,7 +191,7 @@ def preping_rawdata(rawdata):
 def compile_transfers(rawdata):
     """Returns DataFrame of processed transaction data"""
 
-    logger.info(f'Function start arguments: {locals()}')
+    logger.info(f'Function start')
     logger.debug(
         'Every transfer will be logged using a "RAWINDEX=[index]," format. Example below'
     )
@@ -390,7 +390,7 @@ def _is_internalTransaction(current_transaction, rawdata, index):
 def import2cash(transactions_compiled, path_to_Book):
     """Write compiled transactions to GNUCash Book"""
 
-    logger.info(f'Function start arguments: {locals()}')
+    logger.info(f'Function start')
 
     book = piecash.open_book(path_to_Book.as_posix(), readonly=False)
 
