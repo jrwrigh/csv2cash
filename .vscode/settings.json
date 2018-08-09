@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "C:\\tools\\miniconda3\\python.exe",
+    "python.pythonPath": "C:\\tools\\miniconda3\\envs\\csv2cash\\python.exe",
     "cSpell.words": [
         "duplicatetf",
         "iterrows"
