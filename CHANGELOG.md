@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.3.1 - 2018-8-9
+
+### Fixed
+- (#11) Logging simplified, no longer hampers performance.
+
 ## 0.3.0 - 2018-08-09
 
 ### Added
