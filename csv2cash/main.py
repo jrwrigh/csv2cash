@@ -129,7 +129,9 @@ def translating_rawdata(translation, rawdata):
     amount_mod = []
     account_mod = []
     category_mod = []
-    for _, row in rawdata.iterrows():
+    for index, row in rawdata.iterrows():
+        logger.debug(f'INDEX={index}, current contents= {row.to_dict()}.')
+
         # Make list of transaction values with negatives
         if row['Transaction Type'] == 'debit':
             amount_mod.append(Decimal(str(-row['Amount'])))
@@ -147,6 +149,10 @@ def translating_rawdata(translation, rawdata):
             category_mod.append(translation['Categories'][row['Category']])
         else:
             category_mod.append(translation['Categories']['Uncategorized'])
+
+        logger.debug(
+            f'INDEX={index}, translated values: amount_mod={amount_mod[-1]}, account_mod={account_mod[-1]}, category_mod={category_mod[-1]}'
+        )
 
     rawdata['amount_mod'] = amount_mod
     rawdata['account_mod'] = account_mod
@@ -186,12 +192,19 @@ def compile_transfers(rawdata):
     """Returns DataFrame of processed transaction data"""
 
     logger.info(f'Function start arguments: {locals()}')
+    logger.debug(
+        'Every transfer will be logged using a "INDEX=[index]," format. Example below'
+    )
+    logger.debug(
+        'INDEX=-5, {Information regarding what function is performed to the transfer at index -5'
+    )
 
     transactions_compiled = pd.DataFrame(
         columns=['description', 'post_date', 'note', 'split1', 'split2'])
 
     for index, current_transaction in rawdata.iterrows():
-        logger.debug('INDEX={index}, ')
+        logger.debug(
+            f'INDEX={index}, Working on: {current_transaction.to_dict()}')
         if rawdata.at[index, 'is_claimed'] == False:
             # Separating the external transactions from internal. Duplicate indicates internal transaction
             internalTrans_tf = _is_internalTransaction(current_transaction,
@@ -250,6 +263,8 @@ def _externalTransactions_append(current_transaction, rawdata,
 
     transactions_compiled = transactions_compiled.append(
         temp, ignore_index=True)
+    logger.debug(f'INDEX={index}, Transaction added: {temp}')
+
     rawdata.at[index, 'is_claimed'] = True
     return (transactions_compiled)
 
@@ -301,6 +316,7 @@ def _internalTransaction_append(current_transaction, nearest_duplicate, rawdata,
 
     transactions_compiled = transactions_compiled.append(
         temp, ignore_index=True)
+    logger.debug(f'INDEX={index}, Transaction added: {temp}')
 
     # Mark the transactions has claimed; prevents duplicate in transaction_compiled
     rawdata.at[index, 'is_claimed'] = True
@@ -333,6 +349,10 @@ def _determine_internalTransactions(current_transaction, rawdata, index):
     rawdataindex = nearest_duplicate[0]
     nearest_duplicate = nearest_duplicate[1]
     nearest_duplicate['rawdataindex'] = rawdataindex
+    logger.debug(
+        f'INDEX={index}, Duplicate determined to be at INDEX={rawdataindex}.')
+    logger.debug(
+        f'INDEX={index}, Duplicate contents: {nearest_duplicate.to_dict()}')
 
     return (nearest_duplicate)
 
@@ -343,6 +363,8 @@ def _is_internalTransaction(current_transaction, rawdata, index):
     logger.debug(f'INDEX={index}, Function start arguments: {locals()}')
 
     if not current_transaction['duplicatetf']:
+        logger.debug(
+            f'INDEX={index}, Transfer has no duplicate, therefore external')
         return (False)
 
     elif current_transaction['duplicatetf']:
@@ -351,7 +373,15 @@ def _is_internalTransaction(current_transaction, rawdata, index):
             (rawdata['amount_mod'] == -current_transaction['amount_mod']) &
             (rawdata['is_claimed'] != True)]
         if len(identical_duplicates) != 0:
+            logger.debug(
+                f'INDEX={index}, Transfer has duplicate and matching transfer, therefore internal'
+            )
             return (True)
+        else:
+            logger.debug(
+                f'INDEX={index}, Transfer has duplicate but no matching transfer, therefore external'
+            )
+            return (False)
 
 
 ##########################################################################
@@ -380,7 +410,10 @@ def import2cash(transactions_compiled, path_to_Book):
             "Uncategorized", "EXPENSE", currency, parent=book.root_account)
         book.save()
 
-    for _, transaction in transactions_compiled.iterrows():
+    for index, transaction in transactions_compiled.iterrows():
+        logger.debug(f'INDEX={index}, writing transaction to GNUCashBook')
+        logger.debug(
+            f'INDEX={index}, transaction contents= {transaction.to_dict()}')
         _ = piecash.Transaction(
             currency=currency,
             description=transaction['description'],
