@@ -2,10 +2,15 @@
 
 ## Unreleased
 
+## 0.3.2 - 2018-08-10
+
+### Fixed
+- (#11) Dates are now added correctly to GNUCash book
+
 ### Changed
 - Removed common placeholder accounts from translation.json
 
-## 0.3.1 - 2018-8-9
+## 0.3.1 - 2018-08-09
 
 ### Fixed
 - (#11) Logging simplified, no longer hampers performance.
