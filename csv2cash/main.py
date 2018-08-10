@@ -414,6 +414,7 @@ def import2cash(transactions_compiled, path_to_Book):
         _ = piecash.Transaction(
             currency=currency,
             description=transaction['description'],
+            post_date=transaction['post_date'].date(),
             splits=[
                 piecash.Split(
                     account=book.accounts(
