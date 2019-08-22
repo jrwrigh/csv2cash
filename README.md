@@ -80,8 +80,10 @@ A few tools have been created in order to assist with the creation of the `trans
 
 ## Note:
 
-Currently requires the use of a development version of `piecash` to work with GNUCash 3.X. You can install the new version currently (2018-06-18) through pip: 
+~Currently requires the use of a development version of `piecash` to work with GNUCash 3.X. You can install the new version currently (2018-06-18) through pip:~
 
-`pip install git+https://github.com/sdementen/piecash.git@feature/py3-gnucash3`
+~`pip install git+https://github.com/sdementen/piecash.git@feature/py3-gnucash3`~
+
+`piecash` has now merged the feature branch into it's master branch under version 1.0.0. If anyone can use this version and verify that it works, please let me know in [issue #17](https://github.com/jrwrigh/csv2cash/issues/17).
 
 
