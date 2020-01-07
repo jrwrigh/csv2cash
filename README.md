@@ -119,7 +119,7 @@ A few tools have been created in order to assist with the creation of the
 `translations.json` file. They are `get_uncat_transfers` and
 `write_account_list`. 
 
-`get_uncat_transfer` will return a pandas DataFrame will all the transfers
+`get_uncat_transfers` will return a pandas DataFrame will all the transfers
 who's modified category name is "Uncategorized" (which is the default if no
 applicable key:value pair is given). This can be viewed using `dfgui` to see
 what transfers still need translations. `dfgui` also has several helpful
