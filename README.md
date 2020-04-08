@@ -7,7 +7,7 @@
 
 ## What does it do?
 
-### It takes your raw transfer data and compiles it into transactions
+### It takes your raw *transfer* data and compiles it into *transactions*
 
 A transfer is simply half of a transaction in [double-entry
 bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping_system)
@@ -24,13 +24,13 @@ related and should be viewed as a single transaction. This package finds the
 separate transfers, figures out which ones correspond to each other, and puts
 their data together
 
-### Translates your CSV categories into a GNUCash account Say your CSV has a
+### Translates your CSV categories into a GNUCash account 
 
-category system attached to each transfer and you want that organization to be
-transferred into Mint without having to go one-by-one through every transfer
-and label them. This will do that by setting up the `translation.json`
-dictionary, which will take a transfer that is under a given category, and
-place it in the corresponding GNUCash account.
+Say your CSV has a category system attached to each transfer and you want 
+that organization to be transferred into Mint without having to go one-by-one
+through every transfer and label them. This will do that by setting up the 
+`translation.json` dictionary, which will take a transfer that is under a given
+category, and place it in the corresponding GNUCash account.
 
 Use the `get_uncat_transfers` function to view any transactions that haven't
 been categorized. This can be useful to determine what translations you still
