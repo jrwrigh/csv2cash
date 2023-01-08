@@ -87,7 +87,7 @@ def get_translation(path_to_translationJSON):
     """Returns dictionary with translations.json data"""
 
     logger.debug(f'Function start arguments: {locals()}')
-    with path_to_translationJSON.open() as translationjson:
+    with Path(path_to_translationJSON).open() as translationjson:
         return (jsonload(translationjson))
 
 
