@@ -390,7 +390,7 @@ def import2cash(transactions_compiled, path_to_Book):
     logger.info(f'Function start')
     logger.info(f'Length of transactions_compiled: {len(transactions_compiled.index)}')
 
-    book = piecash.open_book(path_to_Book.as_posix(), readonly=False)
+    book = piecash.open_book(Path(path_to_Book).as_posix(), readonly=False, open_if_lock=True)
 
     # if the GNUCash Book has one currency, use that currency
     if len(book.commodities) == 1:
